@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: black;
+    --foreground: black;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 0 0% 0%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+#circle-shape {
+  position: absolute;
+  width: 25vw;
+  height: 25vw;
+  left: 3rem;
+  top: 3rem;
+  top: 10vh;
+}
+#circle1 {
+  position: absolute;
+  width: 25vw;
+  height: 25vw;
+  background-color: rgb(70, 70, 255);
+  border-radius: 50%;
+  filter: blur(20px);
+  animation-name: anime2;
+  animation-duration: 5s;
+  animation-timing-function: var(--accent);
+  animation-iteration-count: infinite;
+  animation-direction: alternate-reverse;
+}
+#circle2 {
+  position: absolute;
+  width: 25vw;
+  height: 25vw;
+  background: linear-gradient(blue, rgb(70, 70, 255));
+  border-radius: 50%;
+  filter: blur(30px);
+  animation-name: anime1;
+  animation-duration: 5s;
+  animation-timing-function: var(--accent);
+  animation-iteration-count: infinite;
+  animation-direction: alternate-reverse;
+}
+#circle3 {
+  position: absolute;
+  width: 25vw;
+  height: 25vw;
+  background-color: rgb(70, 70, 255);
+  border-radius: 50%;
+  filter: blur(20px);
+  animation-name: anime1;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes anime1 {
+  from {
+    transform: translate(15%, -10%);
+  }
+  to {
+    transform: translate(0%, 10%);
+  }
+}
+@keyframes anime2 {
+  from {
+    transform: translate(55%, -3%);
+  }
+  to {
+    transform: translate(-20%, 20%);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) var(--primary);
+}
+
+*::-webkit-scrollbar {
+  width: 17px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--primary);
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 14px;
+  border: 3px solid var(--primary);
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tertiary);
+}
