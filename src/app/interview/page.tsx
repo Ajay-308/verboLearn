@@ -46,7 +46,7 @@ const ChatComponent: React.FC = () => {
       );
 
       setInputMessage("");
-      speak(response.data.message);
+      //speak(response.data.message);
     } catch (error) {
       console.error("Error sending message:", error);
     }

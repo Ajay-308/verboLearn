@@ -44,7 +44,6 @@ const Learn: React.FC = () => {
       );
 
       setInputMessage("");
-      speak(response.data.message);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -65,52 +64,52 @@ const Learn: React.FC = () => {
 
   //text to speech
 
-  const speak = async (text: string) => {
-    const url = "https://joj-text-to-speech.p.rapidapi.com/";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "e52465886amsh8c5f506411e78aap1a949ajsn8f5abf05fd02",
-        "X-RapidAPI-Host": "joj-text-to-speech.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        input: {
-          text: text,
-        },
-        voice: {
-          languageCode: "en-US",
-          name: "en-US-News-L",
-          ssmlGender: "FEMALE",
-        },
-        audioConfig: {
-          audioEncoding: "MP3",
-        },
-      }),
-    };
+  // const speak = async (text: string) => {
+  //   const url = "https://joj-text-to-speech.p.rapidapi.com/";
+  //   const options = {
+  //     method: "POST",
+  //     headers: {
+  //       "content-type": "application/json",
+  //       "X-RapidAPI-Key": "e52465886amsh8c5f506411e78aap1a949ajsn8f5abf05fd02",
+  //       "X-RapidAPI-Host": "joj-text-to-speech.p.rapidapi.com",
+  //     },
+  //     body: JSON.stringify({
+  //       input: {
+  //         text: text,
+  //       },
+  //       voice: {
+  //         languageCode: "en-US",
+  //         name: "en-US-News-L",
+  //         ssmlGender: "FEMALE",
+  //       },
+  //       audioConfig: {
+  //         audioEncoding: "MP3",
+  //       },
+  //     }),
+  //   };
 
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json(); // Assuming the response is JSON
-      console.log(result);
+  //   try {
+  //     const response = await fetch(url, options);
+  //     const result = await response.json(); // Assuming the response is JSON
+  //     console.log(result);
 
-      // Check if the response contains an audio URL
-      if (result && result.audioContent) {
-        setAudioUrl(`data:audio/mp3;base64,${result.audioContent}`);
-      } else {
-        console.error("Failed to get audio content from the API response.");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //     // Check if the response contains an audio URL
+  //     if (result && result.audioContent) {
+  //       setAudioUrl(`data:audio/mp3;base64,${result.audioContent}`);
+  //     } else {
+  //       console.error("Failed to get audio content from the API response.");
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
-  useEffect(() => {
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
-      audio.play();
-    }
-  }, [audioUrl]);
+  // useEffect(() => {
+  //   if (audioUrl) {
+  //     const audio = new Audio(audioUrl);
+  //     audio.play();
+  //   }
+  // }, [audioUrl]);
 
   // listen
 
