@@ -10,14 +10,45 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PinContainer } from "@/components/ui/3d-pin";
-
+import { prisma } from "@/lib/db";
 export const metadata: Metadata = {
   title: "Talk User",
 };
+interface EmailAddress {
+  email_address: string;
+  id: string;
+  // verification: {
+  //   status: string;
+  //   attempts: number;
+  //   strategy: string;
+  //   expire_at: number;
+  // };
+}
 
-const NotesPage = async () => {
+interface UserAttributes {
+  username: string;
+  last_name: string;
+  first_name: string;
+  updated_at: number;
+  email_addresses: EmailAddress[];
+}
+
+const NotesPage = async (req: Request, res: Response) => {
   const { userId } = auth();
-  if (!userId) throw new Error("userId undefined");
+  if (userId) {
+    const user = await prisma.user.findUnique({
+      where: {
+        externalId: userId,
+      },
+    });
+    const userAttribute: UserAttributes =
+      user?.attributes as unknown as UserAttributes;
+
+    if (userAttribute.email_addresses[0].email_address) {
+      console.log(userAttribute.email_addresses[0].email_address);
+      console.log(userAttribute.username);
+    }
+  }
 
   return (
     <div>
