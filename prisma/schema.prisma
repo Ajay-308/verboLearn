@@ -13,11 +13,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  id  Int @id @default(autoincrement())
-  externalId  String @unique
+model User {
+  id         Int      @id @default(autoincrement())
+  externalId String   @unique
   attributes Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  scores     Score[]
+  chatHistory ChatMessage[]
+}
 
+model Score {
+  id     Int   @id @default(autoincrement())
+  score  Int
+  userId Int
+  user   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+//chat
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userMessage   String
+  botMessage    String
+  createdAt DateTime @default(now())
 }
