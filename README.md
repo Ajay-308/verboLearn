@@ -47,32 +47,3 @@ Contributions to VerboLearn are welcome! If you'd like to contribute, please fol
 Fork the repository and create a new branch for your contributions.
 Ensure your code follows the project's coding standards and guidelines.
 Submit a pull request detailing the changes you've made and the problem they address.
-Getting Started:
-To use VerboLearn, follow these steps:
-
-Clone the repository to your local machine:
-
-bash
-Copy code
-git clone https://github.com/Ajay-308/VerboLearn.git
-Navigate to the project directory:
-
-bash
-Copy code
-cd VerboLearn
-Install any necessary dependencies specified in the documentation:
-
-bash
-Copy code
-npm install
-Run the Backend in your local system:
-
-bash
-Copy code
-cd model
-python api.py
-Run the frontend application:
-
-bash
-Copy code
-npm run dev
