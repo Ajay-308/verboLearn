@@ -70,8 +70,3 @@ guidelines:
 
  ```bash
 ngrok htttp 3000
-
-
-
-
-
