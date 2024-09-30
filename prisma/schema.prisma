@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   externalId String   @unique
   attributes Json
   createdAt  DateTime @default(now())
@@ -33,8 +33,8 @@ model Score {
 //chat
 model ChatMessage {
   id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  user      User   @relation(fields: [userId],references: [externalId])
   userMessage   String
   botMessage    String
   createdAt DateTime @default(now())

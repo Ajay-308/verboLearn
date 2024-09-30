@@ -8,22 +8,40 @@ import { BotIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { HiSpeakerWave, HiMiniSpeakerXMark } from "react-icons/hi2";
 import { MicIcon } from "lucide-react";
+import { userAgent } from "next/server";
 interface ChatMessage {
-  user: string;
-  jarwis: string;
+  userMessage: string;
+  botMessage: string;
 }
 const Learn: React.FC = () => {
   const [inputMessage, setInputMessage] = useState<string>("");
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => {
-    const storedChatHistory = localStorage.getItem("learnchatHistory");
-    return storedChatHistory ? JSON.parse(storedChatHistory) : [];
-  });
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const msgBoxRef = useRef<HTMLDivElement>(null);
-  const [voiceData, setVoiceData] = useState("");
-  const [error, setError] = useState("");
+
+  // Fetch chat history from Prisma database
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      try {
+        console.log("fetching chat hitory");
+        const response = await fetch("http://localhost:3000/api/his", {
+          method: "GET",
+        });
+        if (!response.ok) {
+          throw new Error("bhai galti ho gyui hai ");
+        }
+        const data = await response.json();
+        setChatHistory(data);
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
+    };
+
+    fetchChatHistory();
+  }, []);
 
   const handleSendMessage = async () => {
+    if (inputMessage.trim() === "") return;
+
     try {
       const response = await axios.post(
         "http://localhost:5000/role",
@@ -32,16 +50,23 @@ const Learn: React.FC = () => {
       );
 
       const newMessage: ChatMessage = {
-        user: inputMessage,
-        jarwis: response.data.message,
+        userMessage: inputMessage,
+        botMessage: response.data.message,
       };
 
       setChatHistory((prevHistory) => [...prevHistory, newMessage]);
 
-      localStorage.setItem(
-        "learnchatHistory",
-        JSON.stringify([...chatHistory, newMessage]),
-      );
+      console.log("newMessage", newMessage);
+      const re = await fetch("/api/his", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newMessage),
+      });
+
+      const data = await response.data;
+      console.log(data);
 
       setInputMessage("");
     } catch (error) {
@@ -61,94 +86,6 @@ const Learn: React.FC = () => {
       msgBoxRef.current.scrollTop = msgBoxRef.current.scrollHeight;
     }
   }, [chatHistory]);
-
-  //text to speech
-
-  // const speak = async (text: string) => {
-  //   const url = "https://joj-text-to-speech.p.rapidapi.com/";
-  //   const options = {
-  //     method: "POST",
-  //     headers: {
-  //       "content-type": "application/json",
-  //       "X-RapidAPI-Key": "e52465886amsh8c5f506411e78aap1a949ajsn8f5abf05fd02",
-  //       "X-RapidAPI-Host": "joj-text-to-speech.p.rapidapi.com",
-  //     },
-  //     body: JSON.stringify({
-  //       input: {
-  //         text: text,
-  //       },
-  //       voice: {
-  //         languageCode: "en-US",
-  //         name: "en-US-News-L",
-  //         ssmlGender: "FEMALE",
-  //       },
-  //       audioConfig: {
-  //         audioEncoding: "MP3",
-  //       },
-  //     }),
-  //   };
-
-  //   try {
-  //     const response = await fetch(url, options);
-  //     const result = await response.json(); // Assuming the response is JSON
-  //     console.log(result);
-
-  //     // Check if the response contains an audio URL
-  //     if (result && result.audioContent) {
-  //       setAudioUrl(`data:audio/mp3;base64,${result.audioContent}`);
-  //     } else {
-  //       console.error("Failed to get audio content from the API response.");
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (audioUrl) {
-  //     const audio = new Audio(audioUrl);
-  //     audio.play();
-  //   }
-  // }, [audioUrl]);
-
-  // listen
-
-  const handleListen = async () => {
-    try {
-      const recognition = new window.webkitSpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.start();
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setVoiceData(transcript);
-        setInputMessage(transcript); // Set voice data to the input message
-        recognition.stop();
-
-        // Call handleSendMessage to send the voice data as a message
-        handleSendMessage();
-        handleSubmit();
-      };
-
-      recognition.onerror = (event) => {
-        setError(`Speech recognition error: ${event.error}`);
-        recognition.stop();
-      };
-    } catch (error) {
-      setError(`Error: ${error}`);
-    }
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const response = await axios.post("http://localhost:5000/listen", {
-        message: voiceData,
-      });
-      console.log(response.data);
-    } catch (error) {
-      console.error(`Error submitting voice data: ${error}`);
-    }
-  };
 
   return (
     <div className="bg-black">
@@ -174,7 +111,7 @@ const Learn: React.FC = () => {
                 <div>
                   <strong className="m-1">user</strong>
                 </div>
-                <h4 className="m-1">{msg.user}</h4>
+                <h4 className="m-1">{msg.userMessage}</h4>
               </div>
 
               <div className="row justify-content-end pl-5">
@@ -190,7 +127,7 @@ const Learn: React.FC = () => {
                     <BotIcon className="m-1 text-white" size={20} />
                     <strong className="m-1">Jarwis</strong>
                   </div>
-                  <h4 className="m-1 text-white">{msg.jarwis}</h4>
+                  <h4 className="m-1 text-white">{msg.botMessage}</h4>
                 </div>
               </div>
             </div>
@@ -212,11 +149,6 @@ const Learn: React.FC = () => {
           >
             Send
           </Button>
-          <MicIcon
-            className="ml-4 mt-2 h-6 w-6 cursor-pointer rounded bg-white  text-black"
-            size={25}
-            onClick={() => handleListen()}
-          />
         </div>
       </div>
     </div>

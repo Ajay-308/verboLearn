@@ -11,6 +11,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PinContainer } from "@/components/ui/3d-pin";
 import { prisma } from "@/lib/db";
+import { error } from "console";
 export const metadata: Metadata = {
   title: "Talk User",
 };
@@ -43,10 +44,13 @@ const NotesPage = async (req: Request, res: Response) => {
     });
     const userAttribute: UserAttributes =
       user?.attributes as unknown as UserAttributes;
-
-    if (userAttribute.email_addresses[0].email_address) {
-      console.log(userAttribute.email_addresses[0].email_address);
-      console.log(userAttribute.username);
+    try {
+      if (userAttribute.email_addresses[0].email_address) {
+        console.log(userAttribute.email_addresses[0].email_address);
+        console.log(userAttribute.username);
+      }
+    } catch (e) {
+      error("user not found");
     }
   }
 
