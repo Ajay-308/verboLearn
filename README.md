@@ -63,6 +63,9 @@ guidelines:
       python api.py
 
 5.Run the frontend application:
-      npm run dev 
+      npm run dev
+
+6. start a ngrok sever and put ngrok domain into clerk webhook for user creation and sync to database
+    ngrok htttp 3000
 
 
