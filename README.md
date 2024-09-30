@@ -2,7 +2,7 @@
 
 
 
-#VerboLearn
+# VerboLearn
 
 VerboLearn is a project designed to assist individuals in their job search journey by providing various features to enhance their resume, interview preparation, and English language skills.
 
