@@ -57,15 +57,21 @@ guidelines:
 3. Install any necessary dependencies specified in the documentation.
     ```bash
     npm install
-4.Run the Backend in you local sytem:
+4. Run the Backend in your Local System:
+    ```bash
+    cd model
+    python api.py
+
+5.Run the Frontend Application:
    ```bash
-      cd model
-      python api.py
+     npm run dev
+```
+6.Start an ngrok Server and Put the ngrok Domain into Clerk Webhook for User Creation and Sync to Database:
 
-5.Run the frontend application:
-      npm run dev
+ ```bash
+ngrok htttp 3000
 
-6. start a ngrok sever and put ngrok domain into clerk webhook for user creation and sync to database
-    ngrok htttp 3000
+
+
 
 
