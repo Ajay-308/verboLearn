@@ -10,30 +10,31 @@ Features
 ### 1. Resume Score Calculator:
 VerboLearn's Resume Score Calculator evaluates the suitability of a user's resume for a specific job position. It provides:
 
-**Resume Upload**: Users can upload their resume document. \n
-**Job Description Input**: Users provide a job description or details about the position they are interested in.
-**Matching Analysis**: The system compares the resume with the job requirements.
-**Score Generation**: VerboLearn generates a score reflecting the alignment between the resume and job requirements.
-**Feedback**: Detailed feedback is provided along with the score.
+1. **Resume Upload**: Users can upload their resume document. 
+2. **Job Description Input**: Users provide a job description or details about the position they are interested in.
+3. **Matching Analysis**: The system compares the resume with the job requirements.
+4. **Score Generation**: VerboLearn generates a score reflecting the alignment between the resume and job requirements.
+5. **Feedback**: Detailed feedback is provided along with the score.
 
 ### 2. Interview Preparation with AI:
 VerboLearn's Interview Preparation feature simulates interview scenarios to help users refine their skills. It includes:
 
-**AI Chatbot Jarvis**: Conducts mock interviews with users.
-**Job-Specific Questions**: Users input the job description.
-**Mock Interview**: Jarvis asks job-specific interview questions.
-**Realistic Simulation**: The experience closely simulates real interviews.
-**Feedback and Improvement**: Users receive constructive feedback on their answers.
+1. **AI Chatbot Jarvis**: Conducts mock interviews with users.
+2. **Job-Specific Questions**: Users input the job description.
+3. **Mock Interview**: Jarvis asks job-specific interview questions.
+4. **Realistic Simulation**: The experience closely simulates real interviews.
+5. **Feedback and Improvement**: Users receive constructive feedback on their answers.
 
 ### 3. English Language Improvement:
 VerboLearn's English Language Improvement feature enhances users' English skills through interactive conversations:
 
-**Interactive Chatbot**: Users engage in conversations in English.
-**Engage in a mock interview with Jarvis**: Practice answering interview questions tailored to the role.
-**Conversational Practice**: The chatbot initiates conversations on various topics.
-**Grammar Correction**: Identifies and corrects grammar errors in real-time.
-**Vocabulary Enhancement**: Offers suggestions to improve vocabulary and phrasing.
-**Personalized Guidance**: Provides tailored advice based on users' proficiency levels.
+1. **Interactive Chatbot**: Users engage in conversations in English.
+2. **Engage in a mock interview with Jarvis**: Practice answering interview questions tailored to the role.
+3. **Conversational Practice**: The chatbot initiates conversations on various topics.
+4. **Grammar Correction**: Identifies and corrects grammar errors in real-time.
+5. **Vocabulary Enhancement**: Offers suggestions to improve vocabulary and phrasing.
+6.**Personalized Guidance**: Provides tailored advice based on users' proficiency levels.
+   
 ## Contribution Guidelines
 Contributions to TALK USER are welcome! If you'd like to contribute, please follow these
 guidelines:
