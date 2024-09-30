@@ -10,7 +10,7 @@ Features
 ### 1. Resume Score Calculator:
 VerboLearn's Resume Score Calculator evaluates the suitability of a user's resume for a specific job position. It provides:
 
-**Resume Upload**: Users can upload their resume document.
+**Resume Upload**: Users can upload their resume document. \n
 **Job Description Input**: Users provide a job description or details about the position they are interested in.
 **Matching Analysis**: The system compares the resume with the job requirements.
 **Score Generation**: VerboLearn generates a score reflecting the alignment between the resume and job requirements.
