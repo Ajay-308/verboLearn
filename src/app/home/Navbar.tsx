@@ -4,32 +4,38 @@ import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import lo from "@/assets/lo-removebg-preview.png";
 
 const Navbar: React.FC = () => {
   return (
     <>
-      <div className=" bg-black pt-2 text-xl text-white shadow">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          {/* Logo and Talk User on the left */}
-          <div className="flex items-center">
-            <Link href="/home" className="flex items-center gap-1">
-              <Image src={logo} alt="shera logo" className="mr-4 h-10 w-10" />
-              <span className="font-bold">Talk User</span>
-            </Link>
-          </div>
-          <div className="flex flex-grow justify-center">
-            <Link
-              href="https://github.com/Ajay-308/TALK_user"
-              className="mx-6 font-fantasy"
-            >
-              <span>Benefits</span>
-            </Link>
-            <Link href="/contact" className="mx-6 font-fantasy">
-              <span>Contact-Us</span>
-            </Link>
-          </div>
-          {/* Toggle button and Get Started button on the right */}
+      <nav className="fixed top-0 z-50 w-full border-b border-purple-500/20 bg-black/50 backdrop-blur-xl">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-2xl font-bold text-transparent">
+              VerboLearn
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-8 md:flex">
+            <a
+              href="#features"
+              className="text-gray-300 transition hover:text-purple-400"
+            >
+              Features
+            </a>
+            <a
+              href="#about"
+              className="text-gray-300 transition hover:text-purple-400"
+            >
+              About
+            </a>
+            <a
+              href="#contact"
+              className="text-gray-300 transition hover:text-purple-400"
+            >
+              Contact
+            </a>
             <UserButton
               afterSignOutUrl="/"
               appearance={{
@@ -41,14 +47,12 @@ const Navbar: React.FC = () => {
                 },
               }}
             />
-          </div>
-          <div>
-            <Button className="ml-12 bg-white text-black hover:scale-110 hover:bg-white">
-              <Link href="/home">Get Started</Link>
+            <Button className="bg-purple-600 text-white hover:bg-purple-700">
+              Get Started
             </Button>
           </div>
         </div>
-      </div>
+      </nav>
     </>
   );
 };
