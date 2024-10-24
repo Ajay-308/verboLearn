@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
         </a>
       </div>
       <div className="mt-4 text-center">
-        © 2024 Bam Bhole. All rights reserved.
+        © 2024 VerboLearn . All rights reserved.
       </div>
     </div>
   );
