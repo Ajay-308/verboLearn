@@ -2,29 +2,27 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import Navbar from "../home/Navbar";
 import { Button } from "@/components/ui/button";
-import { BotIcon, MicIcon, SpeakerIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { HiSpeakerWave, HiMiniSpeakerXMark } from "react-icons/hi2";
+import { Bot } from "lucide-react";
+import Navbar from "@/app/home/Navbar";
+
 interface ChatMessage {
   user: string;
   jarwis: string;
 }
 
-const ChatComponent: React.FC = () => {
+export default function InterviewPrepComponent() {
   const [inputMessage, setInputMessage] = useState<string>("");
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => {
-    // local storage se history leke storedchathistory me daal dega
     const storedChatHistory = localStorage.getItem("chatHistory");
     return storedChatHistory ? JSON.parse(storedChatHistory) : [];
   });
-  const [voiceData, setVoiceData] = useState("");
-  const [error, setError] = useState("");
   const msgBoxRef = useRef<HTMLDivElement>(null);
 
   const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
+
     try {
       const response = await axios.post(
         "http://localhost:5000/chat",
@@ -38,15 +36,11 @@ const ChatComponent: React.FC = () => {
       };
 
       setChatHistory((prevHistory) => [...prevHistory, newMessage]);
-
-      // Store updated chat history in local storage
       localStorage.setItem(
         "chatHistory",
         JSON.stringify([...chatHistory, newMessage]),
       );
-
       setInputMessage("");
-      //speak(response.data.message);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -60,169 +54,69 @@ const ChatComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    // Scroll to the bottom when chatHistory changes
     if (msgBoxRef.current) {
       msgBoxRef.current.scrollTop = msgBoxRef.current.scrollHeight;
     }
   }, [chatHistory]);
 
-  //text to speech
-
-  const speak = async (text: string) => {
-    const url = "https://joj-text-to-speech.p.rapidapi.com/";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "e52465886amsh8c5f506411e78aap1a949ajsn8f5abf05fd02",
-        "X-RapidAPI-Host": "joj-text-to-speech.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        input: {
-          text: text,
-        },
-        voice: {
-          languageCode: "en-US",
-          name: "en-US-News-L",
-          ssmlGender: "FEMALE",
-        },
-        audioConfig: {
-          audioEncoding: "MP3",
-          speakingRate: 1.25,
-        },
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json(); // for response in json
-      console.log(result);
-
-      // Check if the response contains an audio URL
-      if (result && result.audioContent) {
-        setAudioUrl(`data:audio/mp3;base64,${result.audioContent}`);
-      } else {
-        console.error("Failed to get audio content from the API response.");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
-      audio.play();
-    }
-  }, [audioUrl]);
-
-  // listen
-
-  const handleListen = async () => {
-    try {
-      const recognition = new window.webkitSpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.start();
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setVoiceData(transcript);
-        setInputMessage(transcript); // Set voice data to the input message
-        recognition.stop();
-
-        // Call handleSendMessage to send the voice data as a message
-        handleSendMessage();
-      };
-
-      recognition.onerror = (event) => {
-        setError(`Speech recognition error: ${event.error}`);
-        recognition.stop();
-      };
-    } catch (error) {
-      setError(`Error: ${error}`);
-    }
-    handleSubmit();
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const response = await axios.post("http://localhost:5000/listen", {
-        message: voiceData,
-      });
-      console.log(response.data);
-    } catch (error) {
-      console.error(`Error submitting voice data: ${error}`);
-    }
-  };
-
   return (
-    <div className="bg-black">
+    <>
       <Navbar />
-      <div className="container-fluid bg-gradient text-dark flex min-h-screen flex-col items-center justify-center">
-        <h1 className="text-warning -mt-24 mb-2 ml-32 mr-auto font-fantasy text-xl font-bold text-white">
-          Interview Prep with AI
+      <div className="flex h-screen flex-col bg-gray-950 text-gray-100">
+        <h1 className="mt-20 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text py-2 text-center text-2xl font-bold text-transparent md:py-4 md:text-3xl">
+          AI Interview Prep
         </h1>
-        <div
-          className="bg-light mb-4 h-[33rem] w-[70rem] overflow-y-scroll rounded border p-3"
-          ref={msgBoxRef}
-        >
-          {chatHistory.map((msg, index) => (
-            <div key={index} className={`row justify-content-start pl-5`}>
-              <div
-                className="d-flex flex-column ml-auto rounded border bg-white p-2 text-black shadow"
-                style={{
-                  width: "fit-content",
-                  minWidth: "8rem",
-                  maxWidth: "30rem",
-                }}
-              >
-                <div>
-                  <strong className="m-1">user</strong>
-                </div>
-                <h4 className="m-1">{msg.user}</h4>
-              </div>
 
-              <div className="row justify-content-end pl-5">
-                <div
-                  className="d-flex flex-column bg-info w-rounded my-4 -ml-8 mr-auto border p-2 shadow"
-                  style={{
-                    width: "fit-content",
-                    minWidth: "20rem",
-                    maxWidth: "55rem",
-                  }}
-                >
-                  <div className="text-white">
-                    <BotIcon className="m-1" size={20} />
-                    <strong className="m-1">Jarwis</strong>
+        <div className="flex flex-grow flex-col overflow-hidden p-2 md:p-4">
+          <h2 className="-mt-4 mb-2 text-lg text-blue-400 md:text-xl">
+            Practice Session
+          </h2>
+          <div
+            className="mb-2 flex-grow overflow-y-auto rounded-lg border border-gray-800 p-2 md:p-4"
+            ref={msgBoxRef}
+          >
+            {chatHistory.map((msg, index) => (
+              <div key={index} className="mb-2 md:mb-4">
+                {msg.user && (
+                  <div className="mb-1 flex justify-start md:mb-2">
+                    <div className="max-w-[80%] rounded-lg bg-blue-600 px-2 py-1 text-white md:px-4 md:py-2">
+                      <p className="text-sm font-semibold md:text-base">You</p>
+                      <p className="text-sm md:text-base">{msg.user}</p>
+                    </div>
                   </div>
-                  <h4 className="m-1 text-white">{msg.jarwis}</h4>
-                </div>
+                )}
+                {msg.jarwis && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] rounded-lg bg-purple-600 px-2 py-1 text-white md:px-4 md:py-2">
+                      <p className="flex items-center text-sm font-semibold md:text-base">
+                        <Bot className="mr-1 md:mr-2" size={14} /> AI
+                        Interviewer
+                      </p>
+                      <p className="text-sm md:text-base">{msg.jarwis}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
-        </div>
-        <div className="form-group border-5 flex w-[35rem]">
-          <Input
-            type="text"
-            className="form-control bg-light flex-grow "
-            name="message"
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-          />
-          <Button className="ml-4" onClick={handleSendMessage}>
-            Send
-          </Button>
-          <MicIcon
-            className="ml-4 mt-2 h-6 w-6 cursor-pointer rounded bg-white  text-black"
-            size={25}
-            onClick={() => handleListen()}
-          />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Type your response..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-grow border-gray-700 bg-gray-800 text-sm text-white md:text-base"
+            />
+            <Button
+              onClick={handleSendMessage}
+              className="bg-blue-600 text-sm hover:bg-blue-700 md:text-base"
+            >
+              Send
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
-};
-
-export default ChatComponent;
+}
