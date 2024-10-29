@@ -13,7 +13,7 @@ import os
 
 
 load_dotenv()  
-genai.configure(api_key=os.getenv("Gemini_Api")) 
+genai.configure(api_key="AIzaSyAV4bjfsvj7R62aQ0cAnRzhc7h-g2eVC2c") 
 
 app = Flask(__name__)
 CORS(app,supports_credentials=True)

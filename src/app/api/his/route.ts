@@ -4,17 +4,12 @@ import { auth } from "@clerk/nextjs";
 
 const prisma = new PrismaClient();
 
+console.log("hi i am inside database");
 export async function POST(req: Request) {
-  // Authenticate the user and get the userId
+  console.log("inside post");
   const { userId } = auth();
-
-  // Parse the JSON body from the request
   const { userMessage, botMessage } = await req.json();
 
-  console.log("User ID:", userId);
-  console.log("Inside chat history");
-
-  // Validate input
   if (!userMessage || !botMessage || !userId) {
     return NextResponse.json(
       { error: "User ID, User message, and Bot message are required" },
@@ -23,7 +18,6 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Check if the user exists in the database
     const userExists = await prisma.user.findUnique({
       where: { externalId: userId },
     });
@@ -32,24 +26,50 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    console.log("User message:", userMessage);
-    console.log("Bot message:", botMessage);
+    // Ensure botMessage is a string
+    const botMessageString = Array.isArray(botMessage)
+      ? botMessage.join(" ")
+      : botMessage;
 
-    // Create a new chat message in the database
     const chatMessage = await prisma.chatMessage.create({
       data: {
         userId,
-        userMessage: userMessage,
-        botMessage: botMessage,
+        userMessage,
+        botMessage: botMessageString, // Use the joined string
       },
     });
 
-    // Return the saved chat message
     return NextResponse.json(chatMessage, { status: 201 });
   } catch (error) {
     console.error("Error saving chat message:", error);
     return NextResponse.json(
       { error: "Failed to save chat message" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  const { userId } = auth();
+
+  try {
+    const chatMessages = await prisma.chatMessage.findMany({
+      where: {
+        userId: userId ?? undefined,
+      },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(chatMessages, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching chat messages:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch chat messages" },
       { status: 500 },
     );
   }

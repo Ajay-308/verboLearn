@@ -8,17 +8,31 @@ import { Bot } from "lucide-react";
 import Navbar from "@/app/home/Navbar";
 
 interface ChatMessage {
-  user: string;
-  jarwis: string;
+  userMessage: string;
+  botMessage: string;
 }
 
 export default function InterviewPrepComponent() {
   const [inputMessage, setInputMessage] = useState<string>("");
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => {
-    const storedChatHistory = localStorage.getItem("chatHistory");
-    return storedChatHistory ? JSON.parse(storedChatHistory) : [];
-  });
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+
   const msgBoxRef = useRef<HTMLDivElement>(null);
+
+  const fetchChatHistory = async () => {
+    try {
+      const response = await fetch("/api/his", { method: "GET" });
+      if (!response.ok) throw new Error("Failed to fetch chat history");
+
+      const data = await response.json();
+      setChatHistory(data.reverse()); // data ko ulta kardo taaki latest message sabse upar aaye or chat section mai niche aaye
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
+  };
+  // render on page load bencho
+  useEffect(() => {
+    fetchChatHistory();
+  }, []);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -30,16 +44,25 @@ export default function InterviewPrepComponent() {
         { withCredentials: true },
       );
 
-      const newMessage: ChatMessage = {
-        user: inputMessage,
-        jarwis: response.data.message,
+      const newMessage = {
+        userMessage: inputMessage,
+        botMessage: response.data.message,
       };
 
-      setChatHistory((prevHistory) => [...prevHistory, newMessage]);
-      localStorage.setItem(
-        "chatHistory",
-        JSON.stringify([...chatHistory, newMessage]),
-      );
+      console.log("Sending newMessage:", newMessage);
+
+      const re = await fetch("/api/his", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newMessage),
+      });
+
+      const data = await re.json();
+      console.log("Response from server:", data);
+      fetchChatHistory();
+
       setInputMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -77,22 +100,22 @@ export default function InterviewPrepComponent() {
           >
             {chatHistory.map((msg, index) => (
               <div key={index} className="mb-2 md:mb-4">
-                {msg.user && (
+                {msg.userMessage && (
                   <div className="mb-1 flex justify-start md:mb-2">
                     <div className="max-w-[80%] rounded-lg bg-blue-600 px-2 py-1 text-white md:px-4 md:py-2">
                       <p className="text-sm font-semibold md:text-base">You</p>
-                      <p className="text-sm md:text-base">{msg.user}</p>
+                      <p className="text-sm md:text-base">{msg.userMessage}</p>
                     </div>
                   </div>
                 )}
-                {msg.jarwis && (
+                {msg.botMessage && (
                   <div className="flex justify-end">
                     <div className="max-w-[80%] rounded-lg bg-purple-600 px-2 py-1 text-white md:px-4 md:py-2">
                       <p className="flex items-center text-sm font-semibold md:text-base">
                         <Bot className="mr-1 md:mr-2" size={14} /> AI
                         Interviewer
                       </p>
-                      <p className="text-sm md:text-base">{msg.jarwis}</p>
+                      <p className="text-sm md:text-base">{msg.botMessage}</p>
                     </div>
                   </div>
                 )}

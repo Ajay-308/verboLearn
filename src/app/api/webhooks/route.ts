@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { IncomingHttpHeaders } from "http";
 import { NextResponse } from "next/server";
-import { User, WebhookEvent } from "@clerk/nextjs/server"; // Assuming this gives types
 console.log("hi i am here");
 
 const webhookSecret = process.env.WEBHOOK_SECRET || "";
