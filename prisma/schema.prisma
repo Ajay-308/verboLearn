@@ -20,7 +20,8 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   scores     Score[]
-  chatHistory ChatMessage[]
+  learnMessages    LearnMessage[]
+  interviewMessages InterviewMessage[]
 }
 
 model Score {
@@ -29,13 +30,20 @@ model Score {
   userId Int
   user   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+model LearnMessage {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  user        User     @relation(fields: [userId], references: [externalId], onDelete: Cascade)
+  userMessage String
+  botMessage  String
+  createdAt   DateTime @default(now())
+}
 
-//chat
-model ChatMessage {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  user      User   @relation(fields: [userId],references: [externalId])
-  userMessage   String
-  botMessage    String
-  createdAt DateTime @default(now())
+model InterviewMessage {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  user        User     @relation(fields: [userId], references: [externalId], onDelete: Cascade)
+  userMessage String
+  botMessage  String
+  createdAt   DateTime @default(now())
 }

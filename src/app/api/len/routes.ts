@@ -31,11 +31,11 @@ export async function POST(req: Request) {
       ? botMessage.join(" ")
       : botMessage;
 
-    const chatMessage = await prisma.interviewMessage.create({
+    const chatMessage = await prisma.learnMessage.create({
       data: {
         userId,
         userMessage,
-        botMessage: botMessageString, // Use the joined string
+        botMessage: botMessageString,
       },
     });
 
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
   const { userId } = auth();
 
   try {
-    const chatMessages = await prisma.interviewMessage.findMany({
+    const chatMessages = await prisma.learnMessage.findMany({
       where: {
         userId: userId ?? undefined,
       },
