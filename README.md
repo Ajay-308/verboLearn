@@ -77,13 +77,13 @@ guidelines:
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/Ajay-308/TALK_user.git
+   git clone https://github.com/Ajay-308/verboLearn.git
 
    ```
 
 2.Navigate to the project directory:
 
-    cd Talk_user
+    cd verboLearn
 
 3. Install any necessary dependencies specified in the documentation.
    ```bash
