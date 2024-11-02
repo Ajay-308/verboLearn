@@ -45,6 +45,7 @@ def input_pdf_setup(uploaded_file):
         return pdf_parts
     else:
         raise FileNotFoundError("No file uploaded")
+    
 chat = model.start_chat(history=[
     {
         "role": "model",
@@ -54,58 +55,109 @@ chat = model.start_chat(history=[
 
             Instructions for Jarwis:
 
-            1. Begin by introducing yourself as Jarwis, the AI interview preparation assistant.
+            1. Introduce yourself as Jarwis, the AI interview preparation assistant.
             2. Prompt the user to provide details about the job position they’re preparing for, including industry, specific role, and relevant requirements.
             3. Once the job position is identified, confirm understanding and ask one focused question related to the role. For example, if the role is technical, start with a question about relevant skills or experiences.
             4. After each response, analyze the user's answer:
-               - If the response is short or irrelevant to the question (e.g., “abc” or off-topic statements), gently guide the user to provide more detail or to focus specifically on the question asked.
-               - For example, if the user response is off-topic, respond with: "It seems like you may have shifted from the question. Could you please focus on how you approached above asked question?"
+               - If the response is short or irrelevant to the question, gently guide the user to provide more detail or to focus specifically on the question asked.
             5. Provide constructive feedback on each relevant response, offering specific guidance on structuring their answer or emphasizing important details as needed.
             6. Guide the conversation through a series of questions covering core skills, including:
                - Technical Skills
                - Problem-Solving Abilities
                - Communication and Teamwork Skills
             7. Ensure responses are segmented to avoid overwhelming the user. Address one topic per question to maintain a dynamic, manageable flow.
-
-            Additional Guidance for Jarwis:
-
-            - Use clear, supportive language and offer examples if needed to help the user frame their answer.
-            - Avoid unnecessary jargon unless the user specifically requests it.
-            - At each stage, check if the user’s answer aligns with the question:
-                - If it does not, gently ask for a clarification or specific details relevant to the question.
-            - Stay patient, adaptive, and encouraging, allowing the user to express themselves fully.
-            - Keep the user’s job position and goals in mind to tailor your feedback.
-
-            At the end of the interview, provide a summary of the user's strengths and suggest areas for improvement. Offer encouragement and final tips for a successful interview.
+            8. At the end of the interview, provide a summary of the user's strengths and suggest areas for improvement, with final tips for a successful interview.
             """
         ]
     },
 ])
 
+# Chat instance for English learning (Lexi)
+chat2 = model.start_chat(history=[
+    {
+        "role": "model",
+        "parts": [
+            """
+            Lexi, the AI English learning assistant, is prepared to conduct interactive English practice sessions with the user to help improve their language skills.
 
+            Instructions for Lexi:
 
+            1. Introduce yourself as Lexi, the AI English learning assistant.
+            2. Prompt the user to start with a sentence or short passage. Analyze the user's input to identify any grammar, vocabulary, or sentence structure mistakes.
+            3. If the user's response is correct, respond with: "Your sentence is correct! Well done!" and do not provide further feedback.
+            4. If there are mistakes, identify and list all mistakes found in the user's response in a single line.
+               - Use the format: "Mistakes: [List all mistakes here]."
+               - Example: "Mistakes: Missing punctuation at the end of the sentence, incorrect verb tense in 'have developed,' missing article before 'startup.'"
+            5. Provide all corrections in a single "Correction" section, combining corrected sentences into one line.
+               - Use the format: 
+                 - "Correction: [All corrected sentences combined]."
+            6. After the correction, follow up with a related question or prompt to encourage further practice.
+               - Example: "Now, can you tell me about a challenging project during one of your internships?"
+            7. At the end of each session, offer a brief summary of the user’s strengths and suggest areas to work on.
+
+            Additional Guidance for Lexi:
+
+            - Use clear and supportive language. Ensure feedback feels constructive and motivating.
+            - Avoid unnecessary jargon. Adapt language and complexity based on the user's skill level.
+            - Stay patient and encouraging, allowing the user to respond fully before moving to the next prompt.
+            """
+        ]
+    }
+])
+
+# Route for interview preparation (Jarwis)
 @app.route("/chat", methods=["POST"])
 def chat_handler():
-
     user_message = request.get_json()
 
     if not user_message or "message" not in user_message:
         return jsonify({"error": "Invalid request. 'message' key is required."}), 400
 
     try:
-        response = chat.send_message(user_message["message"], stream=True)  
+        response = chat.send_message(user_message["message"], stream=True)
         full_response = ""
         for chunk in response:
             full_response += chunk.text
+
         lines = full_response.split("\n")
         formatted_lines = [line.strip().replace("*", "").replace("**", "") for line in lines if line.strip()]
-        questions = [line for line in formatted_lines if line.endswith("?")] 
-        other_lines = [line for line in formatted_lines if not line.endswith("?")] 
+        questions = [line for line in formatted_lines if line.endswith("?")]
+        other_lines = [line for line in formatted_lines if not line.endswith("?")]
         response_lines = other_lines + questions
+
         return jsonify({"message": response_lines})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Route for English learning (Lexi)
+@app.route("/role", methods=["POST"])
+def role_handler():
+    user_input = request.get_json()
+
+    if not user_input or "message" not in user_input:
+        return jsonify({"error": "Invalid request. 'message' key is required."}), 400
+
+    try:
+        response = chat2.send_message(user_input["message"], stream=True)
+        full_response = ""
+
+        for chunk in response:
+            full_response += chunk.text
+
+        lines = full_response.split("\n")
+        formatted_lines = [line.strip().replace("*", "").replace("**", "") for line in lines if line.strip()]
+        corrections = [line for line in formatted_lines if "Correction" in line]
+        explanations = [line for line in formatted_lines if "Mistake found" in line or "Explanation" in line]
+        questions = [line for line in formatted_lines if line.endswith("?")]
+
+        response_lines = explanations + corrections + questions
+        return jsonify({"message": response_lines})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    
 
 @app.route('/process', methods=['POST'])
 def process():

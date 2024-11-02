@@ -4,11 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../home/Navbar";
 import { Button } from "@/components/ui/button";
-import { BotIcon } from "lucide-react";
+import { Bot } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { HiSpeakerWave, HiMiniSpeakerXMark } from "react-icons/hi2";
-import { MicIcon } from "lucide-react";
-import { userAgent } from "next/server";
 interface ChatMessage {
   userMessage: string;
   botMessage: string;
@@ -18,29 +15,24 @@ const Learn: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const msgBoxRef = useRef<HTMLDivElement>(null);
 
-  // Fetch chat history from Prisma database
-  useEffect(() => {
-    const fetchChatHistory = async () => {
-      try {
-        console.log("fetching chat hitory");
-        const response = await fetch("http://localhost:3000/api/his", {
-          method: "GET",
-        });
-        if (!response.ok) {
-          throw new Error("bhai galti ho gyui hai ");
-        }
-        const data = await response.json();
-        setChatHistory(data);
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    };
+  const fetchChatHistory = async () => {
+    try {
+      const response = await fetch("/api/len", { method: "GET" });
+      if (!response.ok) throw new Error("Failed to fetch chat history");
 
+      const data = await response.json();
+      setChatHistory(data.reverse()); // data ko ulta kardo taaki latest message sabse upar aaye or chat section mai niche aaye
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
+  };
+  // render on page load bencho
+  useEffect(() => {
     fetchChatHistory();
   }, []);
 
   const handleSendMessage = async () => {
-    if (inputMessage.trim() === "") return;
+    if (!inputMessage.trim()) return;
 
     try {
       const response = await axios.post(
@@ -49,15 +41,14 @@ const Learn: React.FC = () => {
         { withCredentials: true },
       );
 
-      const newMessage: ChatMessage = {
+      const newMessage = {
         userMessage: inputMessage,
         botMessage: response.data.message,
       };
 
-      setChatHistory((prevHistory) => [...prevHistory, newMessage]);
+      console.log("Sending newMessage:", newMessage);
 
-      console.log("newMessage", newMessage);
-      const re = await fetch("/api/his", {
+      const re = await fetch("/api/len", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,8 +56,9 @@ const Learn: React.FC = () => {
         body: JSON.stringify(newMessage),
       });
 
-      const data = await response.data;
-      console.log(data);
+      const data = await re.json();
+      console.log("Response from server:", data);
+      fetchChatHistory();
 
       setInputMessage("");
     } catch (error) {
@@ -88,70 +80,63 @@ const Learn: React.FC = () => {
   }, [chatHistory]);
 
   return (
-    <div className="bg-black">
+    <>
       <Navbar />
-      <div className="bg-gradient text-dark flex min-h-screen flex-col place-content-center  items-center justify-center bg-black ">
-        <h1 className="text-warning -mt-24 mb-2 ml-2 mr-auto font-fantasy text-xl font-bold">
-          learn english with AI
+      <div className="flex h-screen flex-col bg-gray-950 text-gray-100">
+        <h1 className="mt-20 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text py-2 text-center text-2xl font-bold text-transparent md:py-4 md:text-3xl">
+          English Learning
         </h1>
-        <div
-          className="bg-light mb-4 h-[33rem] w-[70rem] overflow-y-scroll rounded border p-3"
-          ref={msgBoxRef}
-        >
-          {chatHistory.map((msg, index) => (
-            <div key={index} className={`row justify-content-start pl-5`}>
-              <div
-                className="d-flex flex-column ml-auto rounded border bg-white p-2 text-black shadow"
-                style={{
-                  width: "fit-content",
-                  minWidth: "8rem",
-                  maxWidth: "30rem",
-                }}
-              >
-                <div>
-                  <strong className="m-1">user</strong>
-                </div>
-                <h4 className="m-1">{msg.userMessage}</h4>
-              </div>
 
-              <div className="row justify-content-end pl-5">
-                <div
-                  className="d-flex flex-column bg-info w-rounded my-4 -ml-8 mr-auto border p-2 shadow"
-                  style={{
-                    width: "fit-content",
-                    minWidth: "20rem",
-                    maxWidth: "55rem",
-                  }}
-                >
-                  <div className="text-white">
-                    <BotIcon className="m-1 text-white" size={20} />
-                    <strong className="m-1">Jarwis</strong>
-                  </div>
-                  <h4 className="m-1 text-white">{msg.botMessage}</h4>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="form-group border-5 flex w-[35rem]">
-          <Input
-            type="text"
-            className="form-control  flex-grow  bg-gray-800 text-white"
-            name="message"
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-          />
-          <Button
-            className="ml-4 bg-white text-black  hover:scale-110 hover:bg-white"
-            onClick={handleSendMessage}
+        <div className="flex flex-grow flex-col overflow-hidden p-2 md:p-4">
+          <h2 className="-mt-4 mb-2 text-lg text-blue-400 md:text-xl">
+            Practice Session
+          </h2>
+          <div
+            className="mb-2 flex-grow overflow-y-auto rounded-lg border border-gray-800 p-2 md:p-4"
+            ref={msgBoxRef}
           >
-            Send
-          </Button>
+            {chatHistory.map((msg, index) => (
+              <div key={index} className="mb-2 md:mb-4">
+                {msg.userMessage && (
+                  <div className="mb-1 flex justify-start md:mb-2">
+                    <div className="max-w-[80%] rounded-lg bg-blue-600 px-2 py-1 text-white md:px-4 md:py-2">
+                      <p className="text-sm font-semibold md:text-base">You</p>
+                      <p className="text-sm md:text-base">{msg.userMessage}</p>
+                    </div>
+                  </div>
+                )}
+                {msg.botMessage && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] rounded-lg bg-purple-600 px-2 py-1 text-white md:px-4 md:py-2">
+                      <p className="flex items-center text-sm font-semibold md:text-base">
+                        <Bot className="mr-1 md:mr-2" size={14} /> Lexi
+                      </p>
+                      <p className="text-sm md:text-base">{msg.botMessage}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Type your response..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-grow border-gray-700 bg-gray-800 text-sm text-white md:text-base"
+            />
+            <Button
+              onClick={handleSendMessage}
+              className="bg-blue-600 text-sm hover:bg-blue-700 md:text-base"
+            >
+              Send
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
