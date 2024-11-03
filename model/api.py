@@ -157,7 +157,6 @@ def role_handler():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -168,15 +167,30 @@ def process():
         return jsonify({"error": "Invalid data format. Make sure to provide 'input_text' and 'uploaded_file'."}), 400
 
     pdf_content = input_pdf_setup(uploaded_file)
-    input_prompt1 = """
-    I hope this message finds you well. As an experienced Technical Human Resource Manager, your expertise is needed to evaluate a candidate's profile against a specific job description. Your task is to provide a professional assessment of whether the candidate's profile aligns with the role, highlighting their strengths and weaknesses in relation to the specified job requirements. Please organize your evaluation in a structured manner using bullet points, ensuring the text does not exceed 150 words.
-    """
-    input_prompt2 = """
-    You are an skilled ATS (Applicant Tracking System) scanner with a deep understanding of ATS functionality and NLP For this task, 
-    your task is to evaluate the resume against the provided job description. give me the percentage of match with  job description . First the output should come in percentage and then keyword-present , than that word if which present in resume this resume should to crack any job and then  last final thoughts"""
+    prompts = {
+        "general": """
+            You are an experienced Technical Human Resource Manager.
+            Please review the resume against the job description. 
+            Highlight strengths and weaknesses in relation to the specified job requirements.
+        """,
+        "skills": """
+            You are a Technical HR Manager with expertise in data science.
+            Offer advice on enhancing skills and areas needing improvement based on the job description.
+        """,
+        "keywords": """
+            You are an ATS scanner with data science expertise.
+            Identify missing keywords and recommend skills for improvement.
+        """,
+        "match_percentage": """
+            Evaluate the resume's match percentage with the job description.
+            First, provide a match percentage, followed by missing keywords and final thoughts.
+        """
+    }
 
-    strength = get_gemini_response(input_text, pdf_content, input_prompt1)
-    ats_score = get_gemini_response(input_text, pdf_content, input_prompt2)
+    strength = get_gemini_response(input_text, pdf_content, prompts=prompts['general'])
+    ats_score = get_gemini_response(input_text, pdf_content, prompt=prompts['match_percentage'])
+    
+
     
     return jsonify({"strength": strength, "ats_score": ats_score})
 
