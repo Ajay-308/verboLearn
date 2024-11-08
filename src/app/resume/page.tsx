@@ -1,111 +1,187 @@
 "use client";
 
-import React, { useState } from "react";
-import Navbar from "../home/Navbar";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import Navbar from "../home/Navbar";
+import Footer from "../home/footer";
 
-export default function ResumeTracker() {
-  const [inputText, setInputText] = useState<string>("");
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [strength, setStrength] = useState<string>("");
-  const [atsScore, setAtsScore] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false); // State for loader
+export default function ResumeAnalyzer() {
+  const [file, setFile] = useState<File | null>(null);
+  const [jobDescription, setJobDescription] = useState("");
+  const [customQuery, setCustomQuery] = useState("");
+  const [response, setResponse] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true); // Show loading text
-
-    if (!inputText || !resumeFile) {
-      alert("Please fill in all fields.");
-      setLoading(false); // Hide loading text
+  const analyzeResume = async (queryType: any) => {
+    if (!file || !jobDescription) {
+      setError("Please upload a PDF file and provide a job description");
       return;
     }
 
-    // Reset previous result
-    setStrength("");
-    setAtsScore("");
+    setLoading(true);
+    setError("");
 
     const formData = new FormData();
-    formData.append("input_text", inputText);
-    formData.append("uploaded_file", resumeFile);
+    formData.append("file", file);
+    formData.append("job_description", jobDescription);
+    formData.append("query_type", queryType);
+    if (queryType === "custom") {
+      formData.append("custom_query", customQuery);
+    }
 
     try {
-      const response = await fetch("http://localhost:5000/process", {
+      const res = await fetch("http://localhost:8000/process", {
         method: "POST",
         body: formData,
       });
-      console.log("Response status:", response.status);
-      const data = await response.json();
-      console.log("Response data:", data);
-      setStrength(data.strength);
-      setAtsScore(data.ats_score);
-    } catch (error) {
-      console.error("Error:", error);
+
+      const data = await res.json();
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setResponse(data.response);
+      }
+    } catch (err) {
+      setError("Failed to analyze resume. Please try again.");
     } finally {
-      setLoading(false); // Hide loading text after response or error
+      setLoading(false);
     }
   };
 
   return (
-    <div className="h-screen bg-black text-white ">
+    <div>
       <Navbar />
-      <div className="container mx-auto bg-black  p-4">
-        <h1 className="mb-4 text-2xl font-bold">Resume Evaluation</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="inputText"
-              className="mb-1 block font-fantasy text-white"
-            >
-              Input job discription:
-            </label>
-            <input
-              type="text"
-              id="inputText"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              className="w-full rounded-md border bg-gray-800 px-3 py-2"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="resumeFile"
-              className="mb-1 block font-fantasy text-white"
-            >
-              Upload Resume (PDF):
-            </label>
-            <Input
-              type="file"
-              id="resumeFile"
-              onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
-              className="rounded-md border bg-gray-800 text-white"
-              accept=".pdf"
-              required
-            />
-          </div>
-          <Button
-            type="submit"
-            className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-          >
-            Submit
-          </Button>
-        </form>
-        {loading && <div className="mt-4 text-center ">Loading...</div>}
-        <div id="result" className="mt-8 bg-black">
-          {strength && (
-            <>
-              <h2 className="font-bold text-white ">Result:</h2>
-              <p>
-                <strong>Strength:</strong> {strength}
-              </p>
-              <p>
-                <strong>ATS Score:</strong> {atsScore}
-              </p>
-            </>
-          )}
+      <div className="min-h-screen bg-black pt-24">
+        <div className="container mx-auto max-w-4xl p-4">
+          <Card className="mb-8 bg-gray-900 text-white">
+            <CardHeader>
+              <CardTitle className="text-white">ATS Resume Analyzer</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-300">
+                    Upload Resume (PDF)
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setFile(e.target.files[0]);
+                        }
+                      }}
+                      className="block w-full text-sm text-gray-300
+                      file:mr-4 file:rounded-md file:border-0
+                      file:bg-gray-700 file:px-4
+                      file:py-2 file:text-sm
+                      file:font-semibold file:text-gray-300
+                      hover:file:bg-gray-600"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-300">
+                    Job Description
+                  </label>
+                  <Textarea
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    className="h-32 border-gray-700 bg-gray-800 text-white"
+                    placeholder="Paste the job description here..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <Button
+                    onClick={() => analyzeResume("tell_me_about")}
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Tell Me About the Resume
+                  </Button>
+                  <Button
+                    onClick={() => analyzeResume("improve_skills")}
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    How Can I Improve Skills
+                  </Button>
+                  <Button
+                    onClick={() => analyzeResume("missing_keywords")}
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Missing Keywords
+                  </Button>
+                  <Button
+                    onClick={() => analyzeResume("percentage_match")}
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Percentage Match
+                  </Button>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-300">
+                    Custom Query
+                  </label>
+                  <Textarea
+                    value={customQuery}
+                    onChange={(e) => setCustomQuery(e.target.value)}
+                    className="mb-2 h-20 border-gray-700 bg-gray-800 text-white"
+                    placeholder="Ask your own question..."
+                  />
+                  <Button
+                    onClick={() => analyzeResume("custom")}
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Submit Custom Query
+                  </Button>
+                </div>
+
+                {error && (
+                  <div className="rounded-md bg-red-900 p-4 text-red-100">
+                    {error}
+                  </div>
+                )}
+
+                {loading && (
+                  <div className="p-4 text-center text-gray-300">
+                    <div className="animate-pulse">
+                      Processing your request...
+                    </div>
+                  </div>
+                )}
+
+                {response && (
+                  <Card className="bg-gray-900 text-white">
+                    <CardHeader>
+                      <CardTitle className="text-white">
+                        Analysis Result
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="whitespace-pre-wrap text-gray-300">
+                        {response}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
+      </div>
+      <div className="-mt-20">
+        <Footer />
       </div>
     </div>
   );
