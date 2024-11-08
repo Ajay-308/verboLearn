@@ -26,25 +26,6 @@ def get_gemini_response(input_text, pdf_content, prompt):
     model = genai.GenerativeModel('gemini-pro-vision')
     response = model.generate_content([input_text, pdf_content[0], prompt])
     return response.text
-
-def input_pdf_setup(uploaded_file):
-    if uploaded_file:
-        images = pdf2image.convert_from_bytes(uploaded_file.read())
-        first_page = images[0]
-
-        img_byte_arr = io.BytesIO()
-        first_page.save(img_byte_arr, format='JPEG')
-        img_byte_arr = img_byte_arr.getvalue()
-
-        pdf_parts = [
-            {
-                "mime_type": "image/jpeg",
-                "data": base64.b64encode(img_byte_arr).decode()
-            }
-        ]
-        return pdf_parts
-    else:
-        raise FileNotFoundError("No file uploaded")
     
 chat = model.start_chat(history=[
     {
@@ -158,41 +139,7 @@ def role_handler():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/process', methods=['POST'])
-def process():
-    input_text = request.form.get('input_text')
-    uploaded_file = request.files.get('uploaded_file')
 
-    if not (input_text and uploaded_file):
-        return jsonify({"error": "Invalid data format. Make sure to provide 'input_text' and 'uploaded_file'."}), 400
-
-    pdf_content = input_pdf_setup(uploaded_file)
-    prompts = {
-        "general": """
-            You are an experienced Technical Human Resource Manager.
-            Please review the resume against the job description. 
-            Highlight strengths and weaknesses in relation to the specified job requirements.
-        """,
-        "skills": """
-            You are a Technical HR Manager with expertise in data science.
-            Offer advice on enhancing skills and areas needing improvement based on the job description.
-        """,
-        "keywords": """
-            You are an ATS scanner with data science expertise.
-            Identify missing keywords and recommend skills for improvement.
-        """,
-        "match_percentage": """
-            Evaluate the resume's match percentage with the job description.
-            First, provide a match percentage, followed by missing keywords and final thoughts.
-        """
-    }
-
-    strength = get_gemini_response(input_text, pdf_content, prompts=prompts['general'])
-    ats_score = get_gemini_response(input_text, pdf_content, prompt=prompts['match_percentage'])
-    
-
-    
-    return jsonify({"strength": strength, "ats_score": ats_score})
 
 if __name__ == "__main__":
     app.run(debug=True)
