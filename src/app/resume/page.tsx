@@ -7,15 +7,27 @@ import { Textarea } from "@/components/ui/textarea";
 import Navbar from "../home/Navbar";
 import Footer from "../home/footer";
 
+interface AnalysisPoint {
+  title: string;
+  description: string;
+}
+
+interface AnalysisResponse {
+  summary: string;
+  strengths: AnalysisPoint[];
+  weaknesses: AnalysisPoint[];
+  suggestions: AnalysisPoint[];
+}
+
 export default function ResumeAnalyzer() {
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [customQuery, setCustomQuery] = useState("");
-  const [response, setResponse] = useState("");
+  const [response, setResponse] = useState<AnalysisResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const analyzeResume = async (queryType: any) => {
+  const analyzeResume = async (queryType: string) => {
     if (!file || !jobDescription) {
       setError("Please upload a PDF file and provide a job description");
       return;
@@ -42,7 +54,7 @@ export default function ResumeAnalyzer() {
       if (data.error) {
         setError(data.error);
       } else {
-        setResponse(data.response);
+        setResponse(data);
       }
     } catch (err) {
       setError("Failed to analyze resume. Please try again.");
@@ -51,10 +63,36 @@ export default function ResumeAnalyzer() {
     }
   };
 
+  const renderAnalysisSection = (
+    title: string,
+    points: AnalysisPoint[] | undefined,
+  ) => {
+    if (!points) return null;
+
+    return (
+      <div className="mb-6">
+        <h3 className="mb-4 text-xl font-bold text-white">{title}</h3>
+        <div className="space-y-4">
+          {points.map((point, index) => (
+            <div
+              key={index}
+              className="rounded-lg border border-gray-700 bg-gray-800 p-4"
+            >
+              <h4 className="mb-2 font-semibold text-blue-400">
+                {point.title}
+              </h4>
+              <p className="text-gray-300">{point.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <Navbar />
-      <div className="min-h-screen bg-black pt-24">
+      <div className="min-h-full bg-black pt-24">
         <div className="container mx-auto max-w-4xl p-4">
           <Card className="mb-8 bg-gray-900 text-white">
             <CardHeader>
@@ -169,8 +207,27 @@ export default function ResumeAnalyzer() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="whitespace-pre-wrap text-gray-300">
-                        {response}
+                      <div className="space-y-6">
+                        {/* Summary Section */}
+                        <div className="mb-6">
+                          <h3 className="mb-4 text-xl font-bold text-white">
+                            Summary of Analysis
+                          </h3>
+                          <p className="rounded-lg border border-gray-700 bg-gray-800 p-4 text-gray-300">
+                            {response.summary}
+                          </p>
+                        </div>
+
+                        {/* Render other sections */}
+                        {renderAnalysisSection("Strengths", response.strengths)}
+                        {renderAnalysisSection(
+                          "Weaknesses",
+                          response.weaknesses,
+                        )}
+                        {renderAnalysisSection(
+                          "Suggestions for Improvement",
+                          response.suggestions,
+                        )}
                       </div>
                     </CardContent>
                   </Card>

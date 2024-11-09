@@ -50,7 +50,7 @@ const Navbar: React.FC = () => {
           >
             Contact
           </a>
-          <Link href={""}>
+          <Link href="/tasks">
             <BellIcon className="cursor-pointer text-gray-300">
               <title>Notification</title>
             </BellIcon>
