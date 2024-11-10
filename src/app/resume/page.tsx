@@ -92,7 +92,7 @@ export default function ResumeAnalyzer() {
   return (
     <div>
       <Navbar />
-      <div className="min-h-full bg-black pt-24">
+      <div className="min-h-screen bg-black pt-24">
         <div className="container mx-auto max-w-4xl p-4">
           <Card className="mb-8 bg-gray-900 text-white">
             <CardHeader>
@@ -139,28 +139,21 @@ export default function ResumeAnalyzer() {
                   <Button
                     onClick={() => analyzeResume("tell_me_about")}
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                    className="w-full  bg-purple-600 text-white hover:bg-purple-700"
                   >
                     Tell Me About the Resume
                   </Button>
                   <Button
-                    onClick={() => analyzeResume("improve_skills")}
-                    disabled={loading}
-                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    How Can I Improve Skills
-                  </Button>
-                  <Button
                     onClick={() => analyzeResume("missing_keywords")}
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                    className="w-full  bg-purple-600 text-white hover:bg-purple-700"
                   >
                     Missing Keywords
                   </Button>
                   <Button
                     onClick={() => analyzeResume("percentage_match")}
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                    className="max-w-full  bg-purple-600 text-white hover:bg-purple-700"
                   >
                     Percentage Match
                   </Button>
@@ -179,7 +172,7 @@ export default function ResumeAnalyzer() {
                   <Button
                     onClick={() => analyzeResume("custom")}
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                    className="w-full  bg-purple-600 text-white hover:bg-purple-700"
                   >
                     Submit Custom Query
                   </Button>

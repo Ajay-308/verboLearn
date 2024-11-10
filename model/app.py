@@ -60,29 +60,6 @@ PROMPT_TEMPLATES = {
     Note: Each point must have a clear title followed by a colon and explanation.
     """,
 
-    "improve_skills": """
-    You are a Technical Human Resource Manager with expertise in data science. 
-    Your role is to scrutinize the resume in light of the job description provided. 
-    Share your insights on the candidate's suitability for the role from an HR perspective. 
-    Additionally, offer advice on enhancing the candidate's skills and identify areas where improvement is needed. 
-    Please do not use  any of these **/##/*, or symbols in your response.
-
-    Strengths:
-    1. [Title]: [Detailed explanation]
-    2. [Title]: [Detailed explanation]
-    3. [Title]: [Detailed explanation]
-
-    Areas for Improvement:
-    1. [Title]: [Detailed explanation]
-    2. [Title]: [Detailed explanation]
-    3. [Title]: [Detailed explanation]
-
-    Skill Enhancement Suggestions:
-    1. [Title]: [Detailed explanation]
-    2. [Title]: [Detailed explanation]
-    3. [Title]: [Detailed explanation]
-    Note: Each point must have a clear title followed by a colon and explanation.
-    """,
 
     "missing_keywords": """
     You are a skilled ATS (Applicant Tracking System) scanner with a deep understanding of data science and ATS functionality. 
@@ -108,12 +85,10 @@ PROMPT_TEMPLATES = {
 
     "percentage_match": """
     You are a skilled ATS (Applicant Tracking System) scanner with a deep understanding of data science and ATS functionality. 
-    Your task is to evaluate the resume against the provided job description. Give the percentage of match if the resume matches
-    the job description. First, provide the percentage, then list missing keywords, and finally, share final thoughts.
-    Do not include  any of these **/##/*, symbols, or asterisks in your response.
+    Your task is to evaluate the resume against the provided job description. 
+    Follow this exact format in your response:
 
-    percentage_match:
-    [Provide the percentage match]
+    percentage_match: [number]%
 
     Missing Keywords:
     1. [Keyword 1]
@@ -121,19 +96,34 @@ PROMPT_TEMPLATES = {
     3. [Keyword 3]
 
     Final Thoughts:
-    [Provide a summary on the candidate’s fit]
+    [Provide a brief summary of the candidate's fit]
 
-    Note: Each point must have a clear title followed by a colon and explanation.
+    Note: The percentage must be a number between 0 and 100, followed by the % symbol.
+    """,
+        "custom_query": """
+    You are an experienced Technical Human Resource Manager. Based on the provided resume and job description, 
+    analyze and respond to this specific query:
+
+    {query}
+
+    Please structure your response in this format:
+
+    Summary of Analysis:
+    [Provide a comprehensive overview]
+
+    Key Points:
+    1. [Title]: [Detailed explanation]
+    2. [Title]: [Detailed explanation]
+    3. [Title]: [Detailed explanation]
+
+    Additional Insights:
+    - [Important point 1]
+    - [Important point 2]
+    - [Important point 3]
+
+    Note: Each point should have a clear title followed by a detailed explanation.
     """,
 
-    "custom_query": """
-    You are an experienced Technical Human Resource Manager tasked with reviewing a resume against a job description. Based on the provided custom query, analyze the candidate’s profile, and provide structured feedback.
-
-    Custom Analysis:
-    [Provide detailed feedback based on the custom query]
-
-    Note: Each point must have a clear title followed by a colon and explanation.
-    """
 }
 
 
@@ -156,7 +146,7 @@ def get_gemini_response(prompt: str, pdf_content: list, job_description: str) ->
     return response.text
 
 def format_response(response_text: str, query_type: str) -> dict:
-    if query_type == "percentage_match":
+    if query_type == "missing_keywords":
         sections = {
             "summary": "",
             "strengths": [],
@@ -165,84 +155,29 @@ def format_response(response_text: str, query_type: str) -> dict:
         }
         
         current_section = None
-        missing_keywords = []
-        percentage = ""
-        final_thoughts = ""
-        
         lines = response_text.split('\n')
-        for line in lines:
+        
+        for i, line in enumerate(lines):
             line = line.strip()
             if not line:
                 continue
             
-            # Extract percentage match using regex
-            if "Percentage Match:" in line:
-                current_section = None
-                # Use regex to find the percentage value
-                match = re.search(r"(\d+(\.\d+)?)\s?%", line)
-                if match:
-                    percentage = match.group(0).strip()
-                if not percentage:
-                    percentage = "N/A"
-            
-            # Extract missing keywords
-            elif "Missing Keywords:" in line:
-                current_section = "missing_keywords"
-                continue
-            
-            # Extract final thoughts
-            elif "Final Thoughts:" in line:
-                current_section = "final_thoughts"
-                final_thoughts = line.split(":", 1)[-1].strip()
-                if final_thoughts:  # Only add if there are actual thoughts
-                    sections["suggestions"].append({
-                        "title": "Recommendations",
-                        "description": final_thoughts
-                    })
-                continue
-            
-            # Process missing keywords
-            elif current_section == "missing_keywords" and line[0].isdigit():
-                keyword = line.split(".", 1)[-1].strip()
-                if keyword:  # Only add if there's an actual keyword
-                    sections["weaknesses"].append({
-                        "title": "Missing Keyword",
-                        "description": keyword
-                    })
-            
-            # Add any additional points under final thoughts
-            elif current_section == "final_thoughts" and line:
-                final_thoughts += " " + line
-                sections["suggestions"] = [{
-                    "title": "Recommendations",
-                    "description": final_thoughts.strip()
-                }]
-
-        return sections
-    
-    elif query_type == "missing_keywords":
-        sections = {
-            "summary": "",
-            "strengths": [],
-            "weaknesses": [],
-            "suggestions": []
-        }
-        
-        current_section = None
-        
-        lines = response_text.split('\n')
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-                
+            # Handle Compatibility Evaluation section
             if "Compatibility Evaluation:" in line:
-                current_section = "summary"
-                sections["summary"] = line.split(":", 1)[-1].strip()
+                current_section = "compatibility"
+                continue
             elif "Missing Keywords:" in line:
                 current_section = "missing_keywords"
+                continue
             elif "Areas for Skill Improvement:" in line:
                 current_section = "improvements"
+                continue
+            
+            # Process sections
+            if current_section == "compatibility":
+                if not line.startswith("Missing") and not line.startswith("Areas"):
+                    sections["summary"] += line + " "
+            
             elif current_section == "missing_keywords" and line[0].isdigit():
                 keyword = line.split(".", 1)[-1].strip()
                 if keyword:
@@ -250,18 +185,165 @@ def format_response(response_text: str, query_type: str) -> dict:
                         "title": "Missing Keyword",
                         "description": keyword
                     })
+            
             elif current_section == "improvements" and line[0].isdigit():
-                title, desc = line.split(":", 1) if ":" in line else (line, "")
-                if desc.strip():
+                point = parse_point(line)
+                sections["suggestions"].append(point)
+        
+        return sections
+        
+    elif query_type == "percentage_match":
+        sections = {
+            "summary": "",
+            "strengths": [],
+            "weaknesses": [],
+            "suggestions": [],
+            "percentage": "0"
+        }
+        
+        current_section = None
+        lines = response_text.split('\n')
+        
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if not line:
+                continue
+            
+            if "percentage" in line.lower() or "match" in line.lower():
+                match = re.search(r"(\d+(\.\d+)?)\s*%?", line)
+                if match:
+                    sections["percentage"] = match.group(1)
+                    sections["summary"] = f"Resume matches {sections['percentage']}% with the job description"
+                continue
+            elif "Missing Keywords:" in line:
+                current_section = "missing_keywords"
+                continue
+            elif "final thoughts:" in line.lower():
+                current_section = "final_thoughts"
+                thoughts = []
+                for next_line in lines[i+1:]:
+                    if next_line.strip() and not any(section in next_line.lower() for section in ["missing keywords:", "percentage match:"]):
+                        thoughts.append(next_line.strip())
+                    else:
+                        break
+                if thoughts:
                     sections["suggestions"].append({
-                        "title": title.split(".", 1)[-1].strip(),
-                        "description": desc.strip()
+                        "title": "Final Thoughts",
+                        "description": " ".join(thoughts)
                     })
+                continue
+            
+            if current_section == "missing_keywords" and line[0].isdigit():
+                keyword = line.split(".", 1)[-1].strip()
+                if keyword:
+                    sections["weaknesses"].append({
+                        "title": "Missing Keyword",
+                        "description": keyword
+                    })
+        
+        if not sections["summary"]:
+            sections["summary"] = "Unable to determine exact percentage match"
+        
+        return sections
+    elif query_type == "custom":
+        sections = {
+            "summary": "",
+            "strengths": [],
+            "weaknesses": [],
+            "suggestions": []
+        }
+        
+        current_section = None
+        lines = response_text.split('\n')
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Detect sections
+            if "Summary of Analysis" in line or "Analysis Result" in line:
+                current_section = "summary"
+                continue
+            elif "Strengths" in line:
+                current_section = "strengths"
+                continue
+            elif "Weaknesses" in line:
+                current_section = "weaknesses"
+                continue
+            elif "Suggestions for Improvement" in line:
+                current_section = "suggestions"
+                continue
+            elif "Custom Analysis" in line or "Key Points" in line:
+                # Keep current section if we're in summary, otherwise set to suggestions
+                if current_section != "summary":
+                    current_section = "suggestions"
+                continue
+            
+            # Process content based on current section
+            if current_section == "summary":
+                if not line.startswith("**"):  # Ignore markdown headers
+                    sections["summary"] += line + " "
+            elif current_section in ["strengths", "weaknesses", "suggestions"]:
+                # Check if it's a point with title and description
+                if "**" in line:  # Handle markdown formatted points
+                    line = line.replace("**", "").strip()
+                    if ":" in line:
+                        title, description = line.split(":", 1)
+                        point = {
+                            "title": title.strip(),
+                            "description": description.strip()
+                        }
+                    else:
+                        point = {
+                            "title": "Key Point",
+                            "description": line.strip()
+                        }
+                    sections[current_section].append(point)
+                elif line.startswith("-"):  # Handle bullet points
+                    point = {
+                        "title": "Key Point",
+                        "description": line[1:].strip()
+                    }
+                    sections[current_section].append(point)
+                elif ":" in line:  # Handle regular points with colons
+                    title, description = line.split(":", 1)
+                    point = {
+                        "title": title.strip(),
+                        "description": description.strip()
+                    }
+                    sections[current_section].append(point)
+                elif line and not line.startswith("**"):  # Handle other non-empty, non-header lines
+                    point = {
+                        "title": "Key Point",
+                        "description": line.strip()
+                    }
+                    sections[current_section].append(point)
+        
+        # Clean up summary by removing extra whitespace and markdown
+        sections["summary"] = " ".join(sections["summary"].split())
+        sections["summary"] = re.sub(r'\*\*', '', sections["summary"])
+        
+        # Move any non-categorized points to suggestions
+        if not any([sections["strengths"], sections["weaknesses"], sections["suggestions"]]):
+            current_points = []
+            for line in lines:
+                line = line.strip()
+                if line and "**" in line:
+                    line = line.replace("**", "").strip()
+                    if ":" in line:
+                        title, description = line.split(":", 1)
+                        point = {
+                            "title": title.strip(),
+                            "description": description.strip()
+                        }
+                        current_points.append(point)
+            if current_points:
+                sections["suggestions"] = current_points
         
         return sections
     
     else:
-        # Original format_response logic for other query types
         sections = {
             "summary": "",
             "strengths": [],
@@ -293,7 +375,7 @@ def format_response(response_text: str, query_type: str) -> dict:
             if current_section == "summary":
                 sections["summary"] += line + " "
             elif current_section in ["strengths", "weaknesses", "suggestions"]:
-                if line[0].isdigit():  # Check if line starts with a number
+                if line[0].isdigit():
                     point = parse_point(line)
                     sections[current_section].append(point)
         
@@ -333,7 +415,8 @@ async def analyze_resume(
         pdf_content = process_pdf(file_bytes)
         
         if query_type == "custom" and custom_query:
-            prompt = custom_query
+            # Combine the template with the custom query
+            prompt = PROMPT_TEMPLATES["custom_query"] + "\n\nCustom Query: " + custom_query
         else:
             prompt = PROMPT_TEMPLATES.get(query_type)
             if not prompt:
@@ -341,7 +424,6 @@ async def analyze_resume(
         
         response = get_gemini_response(prompt, pdf_content, job_description)
         structured_response = format_response(response, query_type)
-        print(structured_response)
         return structured_response
     except Exception as e:
         return {"error": str(e)}
