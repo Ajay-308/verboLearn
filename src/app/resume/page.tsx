@@ -159,25 +159,6 @@ export default function ResumeAnalyzer() {
                   </Button>
                 </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-300">
-                    Custom Query
-                  </label>
-                  <Textarea
-                    value={customQuery}
-                    onChange={(e) => setCustomQuery(e.target.value)}
-                    className="mb-2 h-20 border-gray-700 bg-gray-800 text-white"
-                    placeholder="Ask your own question..."
-                  />
-                  <Button
-                    onClick={() => analyzeResume("custom")}
-                    disabled={loading}
-                    className="w-full  bg-purple-600 text-white hover:bg-purple-700"
-                  >
-                    Submit Custom Query
-                  </Button>
-                </div>
-
                 {error && (
                   <div className="rounded-md bg-red-900 p-4 text-red-100">
                     {error}
