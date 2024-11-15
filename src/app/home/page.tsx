@@ -26,7 +26,7 @@ interface UserAttributes {
   email_addresses: EmailAddress[];
 }
 
-const NotesPage = async (req: Request, res: Response) => {
+const Home = async () => {
   const { userId } = auth();
   if (userId) {
     const user = await prisma.user.findUnique({
@@ -217,4 +217,4 @@ const NotesPage = async (req: Request, res: Response) => {
   );
 };
 
-export default NotesPage;
+export default Home;

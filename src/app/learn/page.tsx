@@ -4,8 +4,9 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../home/Navbar";
 import { Button } from "@/components/ui/button";
-import { Bot } from "lucide-react";
+import { Bot, Send, MicIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { keyframes } from "@emotion/react";
 interface ChatMessage {
   userMessage: string;
   botMessage: string;
@@ -14,6 +15,9 @@ const Learn: React.FC = () => {
   const [inputMessage, setInputMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const msgBoxRef = useRef<HTMLDivElement>(null);
+  const [voiceData, setVoiceData] = useState("");
+  const [error, setError] = useState("");
+  const [listening, setListening] = useState(false);
 
   const fetchChatHistory = async () => {
     try {
@@ -79,6 +83,38 @@ const Learn: React.FC = () => {
     }
   }, [chatHistory]);
 
+  const handleListen = async () => {
+    try {
+      const recognition = new window.webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      setListening(true); // Show overlay
+
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setVoiceData(transcript);
+        setInputMessage(transcript);
+        recognition.stop();
+      };
+
+      recognition.onerror = (event) => {
+        setError(`Speech recognition error: ${event.error}`);
+        recognition.stop();
+      };
+
+      recognition.onend = () => setListening(false); // Hide overlay when recognition stops
+    } catch (error) {
+      setError(`Error: ${error}`);
+      setListening(false);
+    }
+  };
+
+  const vibrateAnimation = keyframes`
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  `;
+
   return (
     <>
       <Navbar />
@@ -127,6 +163,11 @@ const Learn: React.FC = () => {
               onKeyDown={handleKeyDown}
               className="flex-grow border-gray-700 bg-gray-800 text-sm text-white md:text-base"
             />
+            <MicIcon
+              className="ml-4 h-10  w-16 cursor-pointer rounded bg-blue-600 py-2 text-black"
+              size={25}
+              onClick={() => handleListen()}
+            />
             <Button
               onClick={handleSendMessage}
               className="bg-blue-600 text-sm hover:bg-blue-700 md:text-base"
@@ -136,6 +177,17 @@ const Learn: React.FC = () => {
           </div>
         </div>
       </div>
+      {listening && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <MicIcon
+            className="text-blue-600"
+            size={100}
+            style={{
+              animation: `${vibrateAnimation} 0.5s ease-in-out infinite`,
+            }}
+          />
+        </div>
+      )}
     </>
   );
 };

@@ -1,5 +1,5 @@
 {
-  "name": "Talk_user",
+  "name": "VerboLearn",
   "version": "0.1.0",
   "proxy": "http://localhost:5000",
   "private": true,
@@ -12,6 +12,7 @@
   "dependencies": {
     "@clerk/nextjs": "^4.26.1",
     "@clerk/themes": "^1.7.9",
+    "@emotion/react": "^11.13.3",
     "@google-cloud/text-to-speech": "^5.1.0",
     "@hookform/resolvers": "^3.3.2",
     "@pinecone-database/pinecone": "^1.1.2",
