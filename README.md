@@ -51,7 +51,7 @@ Master professional English communication with interactive AI conversations.
 
 ## 🎬 Demo
 
-![Verbo Learn Demo](https://via.placeholder.com/800x400/4F46E5/ffffff?text=Verbo+Learn+Demo)
+![Verbo Learn Demo](https://youtu.be/h21nzukhIug?feature=shared)
 
 *Experience the power of AI-driven career preparation*
 
