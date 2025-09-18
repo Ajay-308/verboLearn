@@ -10,7 +10,7 @@
 
 **Your AI-powered career companion for job search success**
 
-[🚀 Live Demo](#) • [📖 Documentation](#-features) • [🐛 Report Bug](https://github.com/Ajay-308/verboLearn/issues) • [✨ Request Feature](https://github.com/Ajay-308/verboLearn/issues)
+[🚀 Live Demo](https://youtu.be/h21nzukhIug?feature=shared) • [📖 Documentation](#-features) • [🐛 Report Bug](https://github.com/Ajay-308/verboLearn/issues) • [✨ Request Feature](https://github.com/Ajay-308/verboLearn/issues)
 
 </div>
 
